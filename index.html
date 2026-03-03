@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Виртуальный музей вычислительной техники — от абака до квантовых</title>
+  <meta name="description" content="Интерактивный виртуальный музей вычислительной техники: от домеханических устройств до квантовых компьютеров и эволюции экранов." />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="inner">
+      <div class="brand" role="banner">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <b>Виртуальный музей</b>
+          <div class="sub">от абака до квантовых компьютеров</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Навигация по залам">
+        <a class="pill" href="#home" title="Главный вход">
+          🏛️ <span>Вход</span>
+        </a>
+        <a class="pill" href="#hall1" title="Домеханическая эпоха">
+          🏺 <span>Зал 1</span>
+        </a>
+        <a class="pill" href="#hall2" title="Механические и электромеханические">
+          ⚙️ <span>Зал 2</span>
+        </a>
+        <a class="pill" href="#hall3" title="Поколения ЭВМ">
+          💡 <span>Зал 3</span>
+        </a>
+        <a class="pill" href="#hall4" title="Современные системы">
+          📱 <span>Зал 4</span>
+        </a>
+        <a class="pill" href="#hall5" title="Эволюция отображения">
+          🎨 <span>Зал 5</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HOME -->
+    <section class="hero" data-route="home">
+      <div class="heroCard">
+        <div class="pad">
+          <h1 class="title">Музей вычислительной эволюции</h1>
+          <p class="lead">
+            Это интерактивная экскурсия по ключевым этапам развития вычислительной техники —
+            от ручных приспособлений до перспективных квантовых машин. Открывайте экспонаты,
+            двигайте «временную шкалу», проходите мини-тест и сравнивайте эпохи.
+          </p>
+
+
+          <div class="metaRow" aria-label="Особенности">
+            <div class="chip"><span class="dot a"></span> 5 основных залов + тематический</div>
+            <div class="chip"><span class="dot b"></span> экспонаты с «музейными карточками»</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sideCard">
+        <h3>Данные для титульного листа</h3>
+        <p>Произвольные данные — можно поправить позже.</p>
+        <div class="mini">
+          <div class="ic">✍️</div>
+          <div style="flex:1">
+            <div class="muted" style="font-size:12.5px;margin-bottom:6px;">ФИО</div>
+            <div style="color:rgba(255,255,255,.86);font-size:13px;line-height:1.35;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.02);">Иванов И.И.</div>
+          </div>
+        </div>
+        <div class="mini">
+          <div class="ic">🎓</div>
+          <div style="flex:1">
+            <div class="muted" style="font-size:12.5px;margin-bottom:6px;">Группа</div>
+            <div style="color:rgba(255,255,255,.86);font-size:13px;line-height:1.35;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.02);">ИС-21</div>
+          </div>
+        </div>
+        <div class="mini">
+          <div class="ic">💾</div>
+          <div style="flex:1">
+            <div class="muted" style="font-size:12.5px;margin-bottom:6px;">Сохранение</div>
+            <div style="color:rgba(255,255,255,.86);font-size:13px;line-height:1.35">
+              Статичные данные по умолчанию — отредактируйте при необходимости.
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+
+    <!-- HALL 1 -->
+    <section class="section" data-route="hall1">
+      <div class="sectionHead">
+        <div>
+          <h2>Зал 1 — Домеханическая эпоха</h2>
+          <div class="desc">Простейшие ручные приспособления для счета и вычислений — до «настоящих машин».</div>
+        </div>
+        <div class="badge">🏺 ~3000 до н.э. — XVII век</div>
+      </div>
+      <div class="sectionBody">
+        <div class="grid" id="hall1Grid"></div>
+      </div>
+    </section>
+
+    <!-- HALL 2 -->
+    <section class="section" data-route="hall2">
+      <div class="sectionHead">
+        <div>
+          <h2>Зал 2 — Механические и электромеханические вычислители</h2>
+          <div class="desc">Шестерни, рычаги, перфокарты и первые массовые учетные системы.</div>
+        </div>
+        <div class="badge">⚙️ XVII — начало XX века</div>
+      </div>
+      <div class="sectionBody">
+        <div class="grid" id="hall2Grid"></div>
+      </div>
+    </section>
+
+    <!-- HALL 3 -->
+    <section class="section" data-route="hall3">
+      <div class="sectionHead">
+        <div>
+          <h2>Зал 3 — Поколения ЭВМ</h2>
+          <div class="desc">Поколения ЭВМ: лампы, транзисторы, ИС, микропроцессоры, перспективы.</div>
+        </div>
+        <div class="badge">💡 1940-е — настоящее и дальше</div>
+      </div>
+      <div class="sectionBody">
+        <div class="grid" id="hall3Grid"></div>
+      </div>
+    </section>
+
+    <!-- HALL 4 -->
+    <section class="section" data-route="hall4">
+      <div class="sectionHead">
+        <div>
+          <h2>Зал 4 — Классификация современных вычислительных систем</h2>
+          <div class="desc">От суперкомпьютеров и серверов до смартфонов, IoT и встроенных систем.</div>
+        </div>
+        <div class="badge">📱 XXI век</div>
+      </div>
+      <div class="sectionBody">
+        <div class="grid" id="hall4Grid"></div>
+      </div>
+    </section>
+
+    <!-- HALL 5 -->
+    <section class="section" data-route="hall5">
+      <div class="sectionHead">
+        <div>
+          <h2>Зал 5 — Эволюция средств отображения информации</h2>
+          <div class="desc">От электронно-лучевых трубок до современных квантовых точек: история экранов.</div>
+        </div>
+        <div class="badge">🎨 1920-е — XXI век</div>
+      </div>
+      <div class="sectionBody">
+        <div class="grid" id="hall5Grid"></div>
+      </div>
+    </section>
+
+    <div class="footer" data-route="home">
+      <div>Подпись (авто): <span class="muted">Иванов И.И.</span> • <span class="muted">ИС-21</span></div>
+      <div class="muted">Клавиши: 1–7 — залы • Ctrl/Cmd+K — случайный экспонат • Esc — закрыть</div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
