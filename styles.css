@@ -180,8 +180,126 @@ body{
 .modalImage{
   border-radius:12px;overflow:hidden;background:rgba(0,0,0,.3);
   border:1px solid rgba(255,255,255,.08);
+  position:relative;
 }
 .modalImage img{width:100%;height:auto;display:block}
+
+.imageSlider{
+  position:relative;
+  background:rgba(0,0,0,.35);
+  overflow:hidden;
+  aspect-ratio:var(--slider-aspect, 4 / 3);
+}
+.modalImage .slideImage{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:none;
+  object-fit:contain;
+  object-position:center;
+  cursor:zoom-in;
+  user-select:none;
+}
+.modalImage .slideImage.active{display:block}
+
+.imageSlideBtn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:2;
+  width:38px;
+  height:38px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(6,7,12,.7);
+  color:#fff;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.imageSlideBtn:hover{
+  background:rgba(124,58,237,.45);
+  border-color:rgba(167,139,250,.9);
+}
+.imageSlidePrev{left:12px}
+.imageSlideNext{right:12px}
+
+.imageSlideCounter{
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  z-index:2;
+  padding:4px 10px;
+  font-size:12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(6,7,12,.72);
+  color:var(--text);
+}
+
+.imageZoomOverlay{
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.88);
+}
+.imageZoomImg{
+  max-width:min(94vw,1400px);
+  max-height:90vh;
+  width:auto;
+  height:auto;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.2);
+  box-shadow:0 24px 60px rgba(0,0,0,.65);
+  cursor:zoom-out;
+}
+.imageZoomClose{
+  position:absolute;
+  top:18px;
+  right:18px;
+  z-index:3;
+  width:42px;
+  height:42px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  font-size:24px;
+  cursor:pointer;
+}
+
+.video{
+  margin-top:14px;
+  min-height:315px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  background:rgba(0,0,0,.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.video iframe{
+  display:block;
+  width:100%;
+  height:315px;
+}
+.videoPlayBtn{
+  border:1px solid rgba(167,139,250,.6);
+  background:rgba(124,58,237,.25);
+  color:#d8ccff;
+  padding:10px 18px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:14px;
+}
+.videoPlayBtn:hover{
+  background:rgba(124,58,237,.35);
+}
 
 .modalInfo{display:flex;flex-direction:column}
 

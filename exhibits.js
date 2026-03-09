@@ -21,7 +21,11 @@ const EXHIBITS = [
     {question:"Где использовался?", options:["В Древнем Египте","В Древней Руси","В Южной Африке"], correct:0}
   ],
   image:"images/hall1/abakus3.png",
-  modalImage:"images/hall1/abakus2.JPG"},
+  modalImages: [
+    "images/hall1/abakus3.png",
+    "images/hall1/abakus1.JPG",
+    "images/hall1/abakus2.JPG"
+    ]},
 
   {id:"antikythera",
   hall:"hall1",
