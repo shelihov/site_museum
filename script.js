@@ -69,6 +69,7 @@ function renderModal(){
       
       <div class="modalGrid">
         <div class="modalImage">
+
           <img src="${escapeHtml(ex.modalImage || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'500\' height=\'400\'%3E%3Crect fill=\'%23334\' width=\'500\' height=\'400\'/%3E%3Ctext x=\'50%\' y=\'50%\' font-size=\'120\' text-anchor=\'middle\' dominant-baseline=\'middle\' fill=\'%23778\'%3E${escapeHtml(ex.icon)}%3C/text%3E%3C/svg%3E')}" alt="${escapeHtml(ex.name)}">
 
           ${ex.video ? `
@@ -103,9 +104,7 @@ function renderModal(){
             <h3>Принцип работы</h3>
             <p>${escapeHtml(ex.work)}</p>
             
-            
-            
-            ${ex.sources && ex.sources.length ? `<h3>Источники</h3><ul>${ex.sources.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>` : ''}
+            ${ex.sources && ex.sources.length ? `<h3>Источники</h3><ul>${ex.sources.map(s => `<li><a href="${escapeHtml(s)}" target="_blank">${escapeHtml(s)}</a></li>`).join('')}</ul>` : ''}
             
             ${ex.quiz ? `<h3>Тест</h3><form id="quizForm">${ex.quiz.map((q, i) => `
               <div class="quizQuestion">
