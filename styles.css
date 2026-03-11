@@ -1,7 +1,7 @@
 :root{
-  --bg0:#06070c;
+  --bg0:#0b060c;
   --bg1:#0b1020;
-  --card:rgba(255,255,255,.07);
+  --card:rgba(38, 10, 31, 0.07);
   --text:rgba(255,255,255,.88);
   --muted:rgba(255,255,255,.62);
 }
@@ -20,7 +20,26 @@ body{
   overflow-x:hidden;
   background-blend-mode:screen;
   background-attachment:fixed;
+  background-size:140% 140%, 130% 130%, 130% 130%, 100% 100%;
+  background-position:0% 0%, 100% 0%, 80% 100%, 0% 0%;
+  animation:auroraShift 24s ease-in-out infinite alternate;
   -webkit-font-smoothing:antialiased;
+}
+
+@keyframes auroraShift{
+  0%{
+    background-position:0% 0%, 100% 0%, 80% 100%, 0% 0%;
+  }
+  50%{
+    background-position:14% 8%, 86% 12%, 70% 92%, 0% 0%;
+  }
+  100%{
+    background-position:8% 14%, 92% 18%, 76% 84%, 0% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  body{animation:none}
 }
 
 .wrap{max-width:1120px;margin:0 auto;padding:22px 18px 64px}
@@ -75,6 +94,57 @@ body{
   background:rgba(0,0,0,.3);
 }
 .cardImage img{width:100%;height:100%;object-fit:cover}
+
+.cardImageSlider{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+.cardImage .cardSlideImage{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none;
+}
+.cardImage .cardSlideImage.active{display:block}
+
+.cardSlideBtn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:3;
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.24);
+  background:rgba(6,7,12,.62);
+  color:#fff;
+  cursor:pointer;
+  opacity:0;
+  transition:opacity .2s ease, background .2s ease;
+}
+.cardSlidePrev{left:8px}
+.cardSlideNext{right:8px}
+.card:hover .cardSlideBtn{opacity:1}
+.cardSlideBtn:hover{background:rgba(124,58,237,.42)}
+@media (hover:none){
+  .cardSlideBtn{opacity:1}
+}
+
+.cardSlideCounter{
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  z-index:3;
+  padding:2px 8px;
+  font-size:11px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(6,7,12,.72);
+  color:var(--text);
+}
 .cardGlow{
   position:absolute;top:0;left:0;right:0;bottom:0;
   background:radial-gradient(circle at center, rgba(124,58,237,.0), rgba(124,58,237,.0));
@@ -109,7 +179,7 @@ body{
 /* MODAL */
 .modal{
   position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;
-  background:rgba(0,0,0,.7);
+  background:rgba(0, 0, 0, 0.356);
   backdrop-filter:blur(5px);
   display:flex;align-items:center;justify-content:center;
   animation:fadeIn .2s ease;
@@ -118,12 +188,12 @@ body{
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 .modalContent{
-  background:linear-gradient(135deg, rgba(11,16,32,.95), rgba(6,7,12,.95));
+  background:linear-gradient(135deg, rgba(36, 20, 36, 0.95), rgba(23, 32, 70, 0.791));
   border:1px solid rgba(255,255,255,.08);
   border-radius:16px;
-  max-width:1100px;
+  max-width:95%;
   width:100%;
-  max-height:80vh;
+  max-height:90%;
   overflow-y:auto;
   box-shadow:0 20px 60px rgba(0,0,0,.8);
   position:relative;
@@ -150,7 +220,7 @@ body{
 
 .modalPrev, .modalNext{
   background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(225, 166, 210, 0.12);
   color:var(--text);
   padding:8px 12px;
   margin-right: 32px;
@@ -178,8 +248,6 @@ body{
 .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:0 32px 32px}
 
 .modalImage{
-  border-radius:12px;overflow:hidden;background:rgba(0,0,0,.3);
-  border:1px solid rgba(255,255,255,.08);
   position:relative;
 }
 .modalImage img{width:100%;height:auto;display:block}
@@ -283,10 +351,32 @@ body{
   justify-content:center;
   overflow:hidden;
 }
+.videoIntro{
+  margin:0 0 10px;
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.5;
+}
 .video iframe{
   display:block;
   width:100%;
   height:315px;
+}
+.videoNotice{
+  padding:16px;
+  text-align:center;
+  color:var(--muted);
+}
+.videoNotice p{
+  margin:0 0 10px;
+}
+.videoNotice a{
+  color:#8fd8ff;
+  text-decoration:none;
+}
+.videoNotice a:hover{
+  color:#b6eaff;
+  text-decoration:underline;
 }
 .videoPlayBtn{
   border:1px solid rgba(167,139,250,.6);
@@ -313,16 +403,84 @@ body{
 .modalText h3:first-child{margin-top:0}
 .modalText p{margin:0 0 12px;font-size:14px;color:var(--muted);line-height:1.6}
 .modalText p:last-child{margin-bottom:0}
+.modalText a{
+  color:#8fd8ff;
+  text-decoration:none;
+}
+.modalText a:hover{
+  color:#b6eaff;
+  text-decoration:underline;
+}
 
 .modalTags{display:flex;gap:8px;flex-wrap:wrap}
 .modalTags .tag{margin:0}
 
-.quizQuestion{margin-bottom:16px}
-.quizQuestion p{margin:0 0 8px;font-size:14px;color:var(--text)}
-.quizQuestion label{display:block;margin:4px 0;font-size:13px;color:var(--muted);cursor:pointer}
-.quizQuestion input{margin-right:8px}
-#checkQuiz{background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:#a78bfa;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;margin-top:12px}
-#checkQuiz:hover{background:rgba(124,58,237,.3)}
+.quizWizard{
+  margin-top:12px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.02);
+}
+.quizProgress{
+  margin-bottom:10px;
+  font-size:13px;
+  color:var(--muted);
+}
+.quizQuestion{margin-bottom:12px}
+.quizQuestion p{
+  margin:0;
+  font-size:15px;
+  color:var(--text);
+  font-weight:500;
+}
+.quizOptions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.quizOption{
+  text-align:left;
+  width:100%;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(11,16,32,.65);
+  color:var(--text);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:14px;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.quizOption:hover:not(:disabled){
+  border-color:rgba(167,139,250,.7);
+  background:rgba(124,58,237,.18);
+}
+.quizOption:disabled{cursor:default}
+.quizOption.correct{
+  border-color:rgba(22,163,74,.8);
+  background:rgba(22,163,74,.22);
+  color:#e7ffe9;
+}
+.quizOption.wrong{
+  border-color:rgba(220,38,38,.85);
+  background:rgba(220,38,38,.2);
+  color:#ffe7e7;
+}
+#quizNext{
+  margin-top:12px;
+  background:rgba(124,58,237,.2);
+  border:1px solid rgba(124,58,237,.4);
+  color:#a78bfa;
+  padding:8px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:13px;
+}
+#quizNext:hover:not(:disabled){background:rgba(124,58,237,.3)}
+#quizNext:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
 #quizResult{margin-top:12px;font-size:14px;color:var(--text)}
 
 @media (max-width:980px){

@@ -46,9 +46,104 @@ function renderBullets(bullets) {
   return bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("");
 }
 
+// Формирует набор фото для мини-слайдера карточки.
+function getCardImages(ex) {
+  const fallback = fallbackImage(ex.icon, 400, 300, "#223", "#667", 48);
+  const images = [];
+  const seen = new Set();
+  const addImage = (src) => {
+    if (!src || seen.has(src)) return;
+    seen.add(src);
+    images.push(src);
+  };
+
+  if (Array.isArray(ex.images)) {
+    ex.images.forEach((img) => addImage(img));
+  }
+  if (Array.isArray(ex.modalImages)) {
+    ex.modalImages.forEach((img) => addImage(img));
+  }
+
+  addImage(ex.image);
+  addImage(ex.modalImage);
+
+  if (!images.length) {
+    addImage(fallback);
+  }
+
+  return images;
+}
+
+// Рендерит мини-слайдер фото для карточки экспоната.
+function renderCardImageSlider(images, exhibitName) {
+  const hasMany = images.length > 1;
+
+  return `
+    <div class="cardImageSlider" data-slider-index="0">
+      ${images
+        .map(
+          (src, index) => `
+            <img
+              class="cardSlideImage ${index === 0 ? "active" : ""}"
+              src="${escapeHtml(src)}"
+              alt="${escapeHtml(exhibitName)}"
+              data-slide-index="${index}"
+            >
+          `
+        )
+        .join("")}
+      ${
+        hasMany
+          ? `
+            <button class="cardSlideBtn cardSlidePrev" type="button" aria-label="Предыдущее фото">←</button>
+            <button class="cardSlideBtn cardSlideNext" type="button" aria-label="Следующее фото">→</button>
+            <div class="cardSlideCounter">
+              <span class="cardSlideCurrent">1</span> / <span class="cardSlideTotal">${images.length}</span>
+            </div>
+          `
+          : ""
+      }
+    </div>
+  `;
+}
+
+// Подключает листание мини-слайдера в карточке по стрелкам.
+function attachCardImageSliderHandlers(cardEl) {
+  const slider = cardEl.querySelector(".cardImageSlider");
+  if (!slider) return;
+
+  const images = [...slider.querySelectorAll(".cardSlideImage")];
+  if (images.length <= 1) return;
+
+  const current = slider.querySelector(".cardSlideCurrent");
+  const prevBtn = slider.querySelector(".cardSlidePrev");
+  const nextBtn = slider.querySelector(".cardSlideNext");
+  let index = 0;
+
+  const update = () => {
+    images.forEach((img, i) => {
+      img.classList.toggle("active", i === index);
+    });
+    current.textContent = String(index + 1);
+    slider.setAttribute("data-slider-index", String(index));
+  };
+
+  prevBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    index = (index - 1 + images.length) % images.length;
+    update();
+  });
+
+  nextBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    index = (index + 1) % images.length;
+    update();
+  });
+}
+
 // Создает DOM-карточку экспоната для сетки зала и вешает открытие модалки по клику.
 function exhibitCard(ex) {
-  const imageSrc = ex.image || fallbackImage(ex.icon, 400, 300, "#223", "#667", 48);
+  const cardImages = getCardImages(ex);
   const bullets = ex.bullets ?? [];
   const tags = ex.tags ?? [];
 
@@ -56,7 +151,7 @@ function exhibitCard(ex) {
   el.className = "card";
   el.innerHTML = `
     <div class="cardImage">
-      <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(ex.name)}">
+      ${renderCardImageSlider(cardImages, ex.name)}
       <div class="cardGlow"></div>
     </div>
     <div class="cardContent">
@@ -79,6 +174,7 @@ function exhibitCard(ex) {
     </div>
   `;
 
+  attachCardImageSliderHandlers(el);
   el.addEventListener("click", () => openModal(ex));
   return el;
 }
@@ -107,13 +203,142 @@ function getModalState() {
   return { ex, hallExhibits, canPrev, canNext };
 }
 
-// Возвращает HTML-блок с видео, если у экспоната указан id ролика.
-function renderVideo(videoId) {
-  if (!videoId) return "";
+// Извлекает id YouTube из URL или возвращает строку как id, если формат похож на id.
+function extractYouTubeId(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      return url.pathname.split("/").filter(Boolean)[0] || null;
+    }
+    if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+      const v = url.searchParams.get("v");
+      if (v) return v;
+
+      const parts = url.pathname.split("/").filter(Boolean);
+      const embedIndex = parts.findIndex((part) => part === "embed" || part === "shorts");
+      if (embedIndex >= 0 && parts[embedIndex + 1]) {
+        return parts[embedIndex + 1];
+      }
+    }
+  } catch (_err) {
+    // Ничего: значение могло быть просто id без URL.
+  }
+
+  return /^[A-Za-z0-9_-]{11}$/.test(raw) ? raw : null;
+}
+
+// Извлекает id Rutube из URL или id-строки.
+function extractRutubeId(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./, "");
+    if (host.includes("rutube.ru")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      const videoIndex = parts.findIndex((part) => part === "video");
+      if (videoIndex >= 0 && parts[videoIndex + 1]) {
+        return parts[videoIndex + 1];
+      }
+      const embedIndex = parts.findIndex((part) => part === "embed");
+      if (embedIndex >= 0 && parts[embedIndex + 1]) {
+        return parts[embedIndex + 1];
+      }
+    }
+  } catch (_err) {
+    // Ничего: значение могло быть просто id без URL.
+  }
+
+  const match = raw.match(/[a-f0-9]{32}/i);
+  return match ? match[0] : null;
+}
+
+// Преобразует входное значение видео в нормализованный embed URL (Rutube или YouTube).
+function resolveVideoEmbed(video) {
+  if (!video) return null;
+
+  if (typeof video === "object") {
+    const platform = String(video.platform || "").toLowerCase();
+    if (video.embedUrl) {
+      return { platform: platform || "custom", embedUrl: String(video.embedUrl).trim() };
+    }
+
+    const value = String(video.url || video.id || "").trim();
+    if (!value) return null;
+
+    if (platform === "youtube" || platform === "yt") {
+      const ytId = extractYouTubeId(value);
+      if (!ytId) return null;
+      return {
+        platform: "youtube",
+        embedUrl: `https://www.youtube.com/embed/${ytId}`,
+        watchUrl: `https://www.youtube.com/watch?v=${ytId}`,
+      };
+    }
+    if (platform === "rutube") {
+      const rutubeId = extractRutubeId(value) || value;
+      return {
+        platform: "rutube",
+        embedUrl: `https://rutube.ru/play/embed/${rutubeId}`,
+        watchUrl: `https://rutube.ru/video/${rutubeId}/`,
+      };
+    }
+
+    return resolveVideoEmbed(value);
+  }
+
+  const raw = String(video).trim();
+  if (!raw) return null;
+
+  const ytId = extractYouTubeId(raw);
+  if (ytId) {
+    return {
+      platform: "youtube",
+      embedUrl: `https://www.youtube.com/embed/${ytId}`,
+      watchUrl: `https://www.youtube.com/watch?v=${ytId}`,
+    };
+  }
+
+  const rutubeId = extractRutubeId(raw);
+  if (rutubeId) {
+    return {
+      platform: "rutube",
+      embedUrl: `https://rutube.ru/play/embed/${rutubeId}`,
+      watchUrl: `https://rutube.ru/video/${rutubeId}/`,
+    };
+  }
+
+  if (raw.includes("/embed/")) {
+    return { platform: "custom", embedUrl: raw, watchUrl: raw };
+  }
+
+  // Обратная совместимость: если передали только строку-id, считаем это Rutube id.
+  return {
+    platform: "rutube",
+    embedUrl: `https://rutube.ru/play/embed/${raw}`,
+    watchUrl: `https://rutube.ru/video/${raw}/`,
+  };
+}
+
+// Возвращает HTML-блок с видео (Rutube/YouTube) с отложенной загрузкой по кнопке Play.
+function renderVideo(video, videoText) {
+  const videoData = resolveVideoEmbed(video);
+  if (!videoData) return "";
 
   return `
     <h3>Видео</h3>
-    <div class="video" data-video-id="${escapeHtml(videoId)}">
+    ${videoText ? `<p class="videoIntro">${escapeHtml(videoText)}</p>` : ""}
+    <div
+      class="video"
+      data-video-embed="${escapeHtml(videoData.embedUrl)}"
+      data-video-platform="${escapeHtml(videoData.platform)}"
+      data-video-watch="${escapeHtml(videoData.watchUrl || "")}">
       <button class="videoPlayBtn" type="button" aria-label="Воспроизвести видео">
         ▶ Воспроизвести
       </button>
@@ -132,25 +357,22 @@ function renderSources(sources) {
     .join("")}</ul>`;
 }
 
-// Рендерит HTML теста (вопросы + варианты + кнопка проверки), если тест задан.
+// Рендерит HTML пошагового теста: по одному вопросу с переходом "Далее".
 function renderQuiz(quiz) {
   if (!quiz) return "";
 
-  return `<h3>Тест</h3><form id="quizForm">${quiz
-    .map(
-      (q, i) => `
-      <div class="quizQuestion">
-        <p>${i + 1}. ${escapeHtml(q.question)}</p>
-        ${q.options
-          .map(
-            (opt, j) =>
-              `<label><input type="radio" name="q${i}" value="${j}"> ${escapeHtml(opt)}</label>`
-          )
-          .join("<br>")}
+  return `
+    <h3>Тест</h3>
+    <div class="quizWizard" data-total="${quiz.length}">
+      <div class="quizProgress">
+        Вопрос <span id="quizStep">1</span> из <span id="quizTotal">${quiz.length}</span>
       </div>
-    `
-    )
-    .join("")}<button type="button" id="checkQuiz">Проверить</button></form><div id="quizResult"></div>`;
+      <div id="quizQuestion" class="quizQuestion"></div>
+      <div id="quizOptions" class="quizOptions"></div>
+      <button type="button" id="quizNext" disabled>Дальше</button>
+      <div id="quizResult"></div>
+    </div>
+  `;
 }
 
 // Формирует список изображений для модалки и гарантирует минимум 2 кадра для слайдера.
@@ -229,7 +451,7 @@ function renderModalInner(ex, hallExhibits, canPrev, canNext) {
       <div class="modalGrid">
         <div class="modalImage">
           ${renderImageSlider(images, ex.name)}
-          ${renderVideo(ex.video)}
+          ${renderVideo(ex.video, ex.videoText)}
         </div>
 
         <div class="modalInfo">
@@ -252,8 +474,6 @@ function renderModalInner(ex, hallExhibits, canPrev, canNext) {
             ${renderSources(ex.sources)}
             ${renderQuiz(ex.quiz)}
           </div>
-
-          <div class="modalTags">${renderTags(tags)}</div>
         </div>
       </div>
     </div>
@@ -341,21 +561,42 @@ function attachImageZoomHandlers(modal) {
   });
 }
 
-// Подключает отложенную загрузку Rutube: iframe создается только после клика "Play".
+// Подключает отложенную загрузку видео: iframe создается только после клика "Play".
 function attachVideoHandlers(modal) {
-  const videoEl = modal.querySelector(".video[data-video-id]");
+  const videoEl = modal.querySelector(".video[data-video-embed]");
   if (!videoEl) return;
 
   const playBtn = videoEl.querySelector(".videoPlayBtn");
-  const videoId = videoEl.getAttribute("data-video-id");
-  if (!playBtn || !videoId) return;
+  const embedUrl = videoEl.getAttribute("data-video-embed");
+  const platform = videoEl.getAttribute("data-video-platform");
+  const watchUrl = videoEl.getAttribute("data-video-watch");
+  if (!playBtn || !embedUrl || !platform) return;
 
   playBtn.addEventListener("click", () => {
+    // Для YouTube при запуске страницы как file:// встраивание может падать с Error 153.
+    if (platform === "youtube" && location.protocol === "file:") {
+      videoEl.innerHTML = `
+        <div class="videoNotice">
+          <p>Встроенный YouTube-плеер недоступен в локальном режиме file://.</p>
+          <a href="${escapeHtml(watchUrl || embedUrl)}" target="_blank" rel="noopener noreferrer">Открыть видео на YouTube</a>
+        </div>
+      `;
+      return;
+    }
+
+    const originParam =
+      platform === "youtube" && location.origin && location.origin !== "null"
+        ? `&origin=${encodeURIComponent(location.origin)}`
+        : "";
+    const src = `${embedUrl}${embedUrl.includes("?") ? "&" : "?"}autoplay=1${originParam}`;
     videoEl.innerHTML = `
       <iframe
-        src="https://rutube.ru/play/embed/${videoId}?autoplay=1"
+        src="${escapeHtml(src)}"
+        title="Видео экспоната"
         frameborder="0"
+        referrerpolicy="strict-origin-when-cross-origin"
         allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         width="100%"
         height="315">
       </iframe>
@@ -363,25 +604,79 @@ function attachVideoHandlers(modal) {
   });
 }
 
-// Подключает логику проверки теста внутри модалки и вывод результата.
+// Подключает пошаговую логику теста: выбор ответа, подсветка и итоговый результат.
 function attachQuizHandler(modal, quiz) {
   if (!quiz) return;
 
-  const checkBtn = modal.querySelector("#checkQuiz");
+  const questionEl = modal.querySelector("#quizQuestion");
+  const optionsEl = modal.querySelector("#quizOptions");
+  const nextBtn = modal.querySelector("#quizNext");
+  const stepEl = modal.querySelector("#quizStep");
+  const totalEl = modal.querySelector("#quizTotal");
   const resultDiv = modal.querySelector("#quizResult");
+  if (!questionEl || !optionsEl || !nextBtn || !stepEl || !totalEl || !resultDiv) return;
 
-  checkBtn.addEventListener("click", () => {
-    let correct = 0;
+  let currentIndex = 0;
+  let correctCount = 0;
+  let answered = false;
 
-    quiz.forEach((q, i) => {
-      const selected = modal.querySelector(`input[name="q${i}"]:checked`);
-      if (selected && parseInt(selected.value, 10) === q.correct) {
-        correct++;
-      }
+  const renderCurrentQuestion = () => {
+    const current = quiz[currentIndex];
+    answered = false;
+    nextBtn.disabled = true;
+    nextBtn.textContent = currentIndex === quiz.length - 1 ? "Показать результат" : "Дальше";
+    stepEl.textContent = String(currentIndex + 1);
+    totalEl.textContent = String(quiz.length);
+    resultDiv.textContent = "";
+
+    questionEl.innerHTML = `<p>${currentIndex + 1}. ${escapeHtml(current.question)}</p>`;
+    optionsEl.innerHTML = current.options
+      .map(
+        (opt, optionIndex) =>
+          `<button type="button" class="quizOption" data-option-index="${optionIndex}">${escapeHtml(opt)}</button>`
+      )
+      .join("");
+
+    const optionButtons = [...optionsEl.querySelectorAll(".quizOption")];
+    optionButtons.forEach((btn, optionIndex) => {
+      btn.addEventListener("click", () => {
+        if (answered) return;
+        answered = true;
+
+        const isCorrect = optionIndex === current.correct;
+        if (isCorrect) {
+          correctCount++;
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+          const correctBtn = optionButtons[current.correct];
+          if (correctBtn) correctBtn.classList.add("correct");
+        }
+
+        optionButtons.forEach((optionBtn) => {
+          optionBtn.disabled = true;
+        });
+        nextBtn.disabled = false;
+      });
     });
+  };
 
-    resultDiv.innerHTML = `<p>Правильных ответов: ${correct} из ${quiz.length}</p>`;
+  nextBtn.addEventListener("click", () => {
+    if (!answered) return;
+
+    if (currentIndex < quiz.length - 1) {
+      currentIndex++;
+      renderCurrentQuestion();
+      return;
+    }
+
+    questionEl.innerHTML = "";
+    optionsEl.innerHTML = "";
+    nextBtn.style.display = "none";
+    resultDiv.innerHTML = `<p>Правильных ответов: ${correctCount} из ${quiz.length}</p>`;
   });
+
+  renderCurrentQuestion();
 }
 
 // Удаляет модалку из DOM и снимает обработчик клавиатуры, связанный с модалкой.
