@@ -408,26 +408,53 @@ function getExhibitImages(ex) {
   return images;
 }
 
+// Формирует подписи к фото для модального слайдера (по слайдам или общая подпись).
+function getExhibitImageCaptions(ex, imageCount) {
+  const list =
+    (Array.isArray(ex.photoCaptions) && ex.photoCaptions) ||
+    (Array.isArray(ex.imageCaptions) && ex.imageCaptions) ||
+    (Array.isArray(ex.modalImageCaptions) && ex.modalImageCaptions) ||
+    [];
+
+  const captions = Array.from({ length: imageCount }, (_unused, index) =>
+    list[index] ? String(list[index]) : ""
+  );
+
+  if (!captions.some(Boolean) && typeof ex.photoCaption === "string") {
+    captions[0] = ex.photoCaption;
+  }
+
+  return captions;
+}
+
 // Рендерит ручной слайдер изображений для модального окна экспоната.
-function renderImageSlider(images, exhibitName) {
+function renderImageSlider(images, exhibitName, captions) {
+  const hasCaption = captions.some((caption) => Boolean(caption));
+
   return `
-    <div class="imageSlider" data-slider-index="0">
-      <button class="imageSlideBtn imageSlidePrev" type="button" aria-label="Предыдущее фото">←</button>
-      <button class="imageSlideBtn imageSlideNext" type="button" aria-label="Следующее фото">→</button>
-      ${images
-        .map(
-          (src, index) => `
-            <img
-              class="slideImage ${index === 0 ? "active" : ""}"
-              src="${escapeHtml(src)}"
-              alt="${escapeHtml(exhibitName)}"
-              data-slide-index="${index}"
-            >
-          `
-        )
-        .join("")}
-      <div class="imageSlideCounter">
-        <span class="imageSlideCurrent">1</span> / <span class="imageSlideTotal">${images.length}</span>
+    <div class="imageSliderWrap">
+      <div class="imageSlider" data-slider-index="0">
+        <button class="imageSlideBtn imageSlidePrev" type="button" aria-label="Предыдущее фото">←</button>
+        <button class="imageSlideBtn imageSlideNext" type="button" aria-label="Следующее фото">→</button>
+        ${images
+          .map(
+            (src, index) => `
+              <img
+                class="slideImage ${index === 0 ? "active" : ""}"
+                src="${escapeHtml(src)}"
+                alt="${escapeHtml(exhibitName)}"
+                data-slide-index="${index}"
+                data-caption="${escapeHtml(captions[index] || "")}"
+              >
+            `
+          )
+          .join("")}
+        <div class="imageSlideCounter">
+          <span class="imageSlideCurrent">1</span> / <span class="imageSlideTotal">${images.length}</span>
+        </div>
+      </div>
+      <div class="imageSlideCaption ${hasCaption ? "show" : ""}">
+        ${escapeHtml(captions[0] || "")}
       </div>
     </div>
   `;
@@ -437,6 +464,7 @@ function renderImageSlider(images, exhibitName) {
 function renderModalInner(ex, hallExhibits, canPrev, canNext) {
   const tags = ex.tags ?? [];
   const images = getExhibitImages(ex);
+  const captions = getExhibitImageCaptions(ex, images.length);
 
   return `
     <div class="modalContent">
@@ -450,7 +478,7 @@ function renderModalInner(ex, hallExhibits, canPrev, canNext) {
 
       <div class="modalGrid">
         <div class="modalImage">
-          ${renderImageSlider(images, ex.name)}
+          ${renderImageSlider(images, ex.name, captions)}
           ${renderVideo(ex.video, ex.videoText)}
         </div>
 
@@ -487,6 +515,7 @@ function attachImageSliderHandlers(modal) {
 
   const images = [...slider.querySelectorAll(".slideImage")];
   const current = slider.querySelector(".imageSlideCurrent");
+  const caption = modal.querySelector(".imageSlideCaption");
   const prevBtn = slider.querySelector(".imageSlidePrev");
   const nextBtn = slider.querySelector(".imageSlideNext");
   let index = 0;
@@ -515,6 +544,12 @@ function attachImageSliderHandlers(modal) {
     });
     current.textContent = String(index + 1);
     slider.setAttribute("data-slider-index", String(index));
+
+    if (caption) {
+      const text = images[index]?.dataset.caption || "";
+      caption.textContent = text;
+      caption.classList.toggle("show", Boolean(text));
+    }
   };
 
   prevBtn.addEventListener("click", () => {

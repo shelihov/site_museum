@@ -258,6 +258,11 @@ body{
   overflow:hidden;
   aspect-ratio:var(--slider-aspect, 4 / 3);
 }
+.imageSliderWrap{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
 .modalImage .slideImage{
   position:absolute;
   inset:0;
@@ -304,6 +309,18 @@ body{
   background:rgba(6,7,12,.72);
   color:var(--text);
 }
+.imageSlideCaption{
+  display:none;
+  margin:0;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+.imageSlideCaption.show{display:block}
 
 .imageZoomOverlay{
   position:fixed;
