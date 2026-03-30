@@ -789,6 +789,63 @@ function renderModal() {
   document.addEventListener("keydown", modalKeydownHandler);
 }
 
+const HALL3_GENERATIONS = [
+  {
+    id: "gen1",
+    title: "1 поколение (1940-е - конец 1950-х)",
+    summary:
+      "Электронные лампы. Громоздкие, потребляли много энергии, отличались низкой надежностью.",
+    exhibits: "ENIAC (США), UNIVAC I (США), М-1, БЭСМ (СССР).",
+  },
+  {
+    id: "gen2",
+    title: "2 поколение (конец 1950-х - середина 1960-х)",
+    summary:
+      "Транзисторы. Меньше размер, выше быстродействие, надежнее ламповых систем.",
+    exhibits: "IBM 7090 (США), CDC 1604 (США), ЭВМ «Раздан-2» (СССР).",
+  },
+  {
+    id: "gen3",
+    title: "3 поколение (середина 1960-х - 1970-е)",
+    summary:
+      "Интегральные схемы (ИС). Использование микросхем, развитие операционных систем, появление мини-ЭВМ.",
+    exhibits: "Семейство IBM System/360 (США), ЕС ЭВМ (СССР).",
+  },
+  {
+    id: "gen4",
+    title: "4 поколение (1980-е - настоящее время)",
+    summary:
+      "Микропроцессоры и большие интегральные схемы (БИС). Появление персональных компьютеров и ноутбуков.",
+    exhibits: "Apple II, IBM PC, Intel 4004.",
+  },
+  {
+    id: "gen5",
+    title: "5 поколение (с 1990-х)",
+    summary:
+      "Сверхбольшие интегральные схемы (СБИС), параллельно-векторные структуры, искусственный интеллект и нейросети.",
+    exhibits: "Современные суперкомпьютеры.",
+  },
+];
+
+function renderHall3WithDividers(grid) {
+  const hall3Items = EXHIBITS.filter((e) => e.hall === "hall3");
+
+  HALL3_GENERATIONS.forEach((generation) => {
+    const divider = document.createElement("div");
+    divider.className = "generationDivider";
+    divider.innerHTML = `
+      <h3>${escapeHtml(generation.title)}</h3>
+      <p>${escapeHtml(generation.summary)}</p>
+      <p><strong>Экспонаты:</strong> ${escapeHtml(generation.exhibits)}</p>
+    `;
+    grid.appendChild(divider);
+
+    hall3Items
+      .filter((item) => item.generation === generation.id)
+      .forEach((item) => grid.appendChild(exhibitCard(item)));
+  });
+}
+
 // Рендерит карточки экспонатов по залам в соответствующие grid-контейнеры.
 function renderHalls() {
   const halls = ["hall1", "hall2", "hall3", "hall4", "hall5"];
@@ -798,6 +855,12 @@ function renderHalls() {
     if (!grid) return;
 
     grid.innerHTML = "";
+
+    if (hallId === "hall3") {
+      renderHall3WithDividers(grid);
+      return;
+    }
+
     EXHIBITS
       .filter((e) => e.hall === hallId)
       .forEach((e) => grid.appendChild(exhibitCard(e)));
